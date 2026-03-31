@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -31,6 +32,9 @@ class AppPanelProvider extends PanelProvider
             ->registration()
             ->colors([
                 'primary' => Color::Purple,
+            ])
+            ->plugins([
+                FilamentShieldPlugin::make()
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
