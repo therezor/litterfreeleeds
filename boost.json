@@ -1,0 +1,16 @@
+{
+    "agents": [
+        "gemini"
+    ],
+    "guidelines": true,
+    "mcp": true,
+    "nightwatch_mcp": false,
+    "packages": [
+        "filament/filament",
+        "barryvdh/laravel-debugbar"
+    ],
+    "sail": true,
+    "skills": [
+        "laravel-best-practices"
+    ]
+}

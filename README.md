@@ -26,7 +26,7 @@ This app provides a management platform for:
 ## Getting Started
 
 ### Prerequisites
-- PHP 8.2+
+- PHP 8.5+
 - Composer
 - Docker (for Laravel Sail)
 - PostgreSQL
