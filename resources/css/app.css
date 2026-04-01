@@ -1,5 +1,7 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+@import "./variables.css";
 
+@source '../../vendor/filament/**/*.blade.php';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
@@ -15,3 +17,4 @@
 [x-cloak] {
     display: none !important;
 }
+

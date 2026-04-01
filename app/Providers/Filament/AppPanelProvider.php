@@ -32,7 +32,9 @@ class AppPanelProvider extends PanelProvider
             ->registration()
             ->colors([
                 'primary' => Color::Purple,
+                'gray' => Color::Gray,
             ])
+            ->viteTheme('resources/css/panel.css')
             ->plugins([
                 FilamentShieldPlugin::make()
             ])
