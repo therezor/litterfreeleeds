@@ -31,14 +31,12 @@
 }
 
 .fi-sidebar,
-.fi-section,
 .fi-card,
 .fi-ta-content {
     background-color: var(--app-card-bg-light) !important;
 }
 
 .dark .fi-sidebar,
-.dark .fi-section,
 .dark .fi-card,
 .dark .fi-ta-content {
     background-color: var(--app-card-bg-dark) !important;
