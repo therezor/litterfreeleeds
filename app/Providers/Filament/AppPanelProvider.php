@@ -11,7 +11,6 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -36,10 +35,13 @@ class AppPanelProvider extends PanelProvider
                 'gray' => Color::Gray,
             ])
             ->viteTheme('resources/css/panel.css')
-            ->plugins([
-                FilamentShieldPlugin::make(),
-            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->plugins([
+                FilamentShieldPlugin::make()
+                    ->navigationSort(99)
+                    ->navigationGroup('User Management')
+                    ->localizePermissionLabels(),
+            ])
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
