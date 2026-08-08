@@ -130,73 +130,134 @@
 }
 
 /* ── Litter picker scene ──────────────────────────────────────────────────
-   One 7s loop: the grabber descends, closes on a piece of litter, lifts,
-   swings over the bag, releases, and returns. Every animated part shares the
-   same duration and timeline so the phases stay locked together — change the
-   duration on .lp-scene and the whole cycle scales.
+   One 16s loop made of three identical trips — the grabber descends, closes on
+   a piece of litter, lifts, swings over the bag, releases, and moves on to the
+   next piece — until all three are cleared and fresh litter fades in.
+
+   Each trip occupies 30% of the loop (starting at 0%, 30% and 60%), leaving a
+   10% tail so the last bounce settles before the loop wraps. Every animated part
+   shares the same duration and timeline so the phases stay locked together —
+   change the duration on .lp-scene and the whole cycle scales. Within a trip the
+   beats are: +2 settle, +8 touch down, +13 gripped, +18 lifted, +22 over the
+   bag, +25 released, +30 parked over the next piece.
+
+   The x offsets are the distance from the arm's drawn position to each piece
+   (0, -50, +62) and from each piece to the bag mouth (230, 280, 168).
    -------------------------------------------------------------------------- */
 .lp-scene {
-    --lp-duration: 7s;
+    --lp-duration: 16s;
 }
 
 @keyframes lp-arm {
-    0%, 4%    { transform: translate(0, -76px); }
-    16%, 26%  { transform: translate(0, 0); }
-    40%       { transform: translate(0, -76px); }
-    52%, 62%  { transform: translate(230px, -76px); }
-    76%, 100% { transform: translate(0, -76px); }
+    0%, 2%     { transform: translate(0, -76px); }
+    8%, 13%    { transform: translate(0, 0); }
+    18%        { transform: translate(0, -76px); }
+    22%, 25%   { transform: translate(230px, -76px); }
+
+    30%, 32%   { transform: translate(-50px, -76px); }
+    38%, 43%   { transform: translate(-50px, 0); }
+    48%        { transform: translate(-50px, -76px); }
+    52%, 55%   { transform: translate(230px, -76px); }
+
+    60%, 62%   { transform: translate(62px, -76px); }
+    68%, 73%   { transform: translate(62px, 0); }
+    78%        { transform: translate(62px, -76px); }
+    82%, 85%   { transform: translate(230px, -76px); }
+
+    92%, 100%  { transform: translate(0, -76px); }
 }
 
 /* The jaws are drawn open, so the untransformed frame reads as "about to grab".
    y points down, so a positive rotation swings the left jaw further out — the
-   left jaw closes on negative angles and the right one on positive. Closed from
-   26% (on the ground, around the litter) to 58% (over the bag, letting go). */
+   left jaw closes on negative angles and the right one on positive. Each trip
+   holds them open until the arm is down (+8) and closed until it is over the
+   bag (+23), so nothing is ever gripped or dropped in mid-air. */
 @keyframes lp-jaw-left {
-    0%, 20%   { transform: rotate(0deg); }
-    26%, 58%  { transform: rotate(-16deg); }
-    64%, 100% { transform: rotate(0deg); }
+    0%, 8%     { transform: rotate(0deg); }
+    11%, 23%   { transform: rotate(-16deg); }
+    25%, 38%   { transform: rotate(0deg); }
+    41%, 53%   { transform: rotate(-16deg); }
+    55%, 68%   { transform: rotate(0deg); }
+    71%, 83%   { transform: rotate(-16deg); }
+    85%, 100%  { transform: rotate(0deg); }
 }
 
 @keyframes lp-jaw-right {
-    0%, 20%   { transform: rotate(0deg); }
-    26%, 58%  { transform: rotate(16deg); }
-    64%, 100% { transform: rotate(0deg); }
+    0%, 8%     { transform: rotate(0deg); }
+    11%, 23%   { transform: rotate(16deg); }
+    25%, 38%   { transform: rotate(0deg); }
+    41%, 53%   { transform: rotate(16deg); }
+    55%, 68%   { transform: rotate(0deg); }
+    71%, 83%   { transform: rotate(16deg); }
+    85%, 100%  { transform: rotate(0deg); }
 }
 
-/* The carried piece of litter. Its X/Y track mirrors lp-arm while gripped; the
-   small rotations read as the piece swinging in the jaws, then tipping as it
-   falls. It fades out inside the bag and a fresh piece fades in on the ground. */
-@keyframes lp-litter {
-    0%, 26%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-    40%       { transform: translate(0, -76px) rotate(-5deg); opacity: 1; }
-    52%       { transform: translate(230px, -76px) rotate(9deg); opacity: 1; }
-    60%       { transform: translate(230px, -76px) rotate(4deg); opacity: 1; }
-    67%       { transform: translate(230px, -60px) rotate(20deg); opacity: 0; }
-    68%, 84%  { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+/* The carried pieces. One keyframe set per piece, differing only in when it is
+   picked up and how far it travels: each holds still on the ground until its own
+   trip lifts, then its X/Y track mirrors lp-arm while gripped. The small
+   rotations read as the piece swinging in the jaws, then tipping as it falls; it
+   fades out inside the bag and stays gone until fresh litter fades in at the end
+   of the loop. */
+@keyframes lp-litter-a {
+    0%, 13%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    18%       { transform: translate(0, -76px) rotate(-5deg); opacity: 1; }
+    22%       { transform: translate(230px, -76px) rotate(9deg); opacity: 1; }
+    24%       { transform: translate(230px, -76px) rotate(4deg); opacity: 1; }
+    27%       { transform: translate(230px, -60px) rotate(20deg); opacity: 0; }
+    28%, 94%  { transform: translate(0, 0) rotate(0deg); opacity: 0; }
     100%      { transform: translate(0, 0) rotate(0deg); opacity: 1; }
 }
 
-/* Bag takes the impact just after the drop, then settles. The bounce lives in
-   the keyframes, so the timing function must NOT overshoot: an easing like
-   cubic-bezier(.34,1.56,.64,1) reverses direction inside every segment on top of
-   the rebound below, and the bag reads as shaking rather than absorbing a knock. */
+@keyframes lp-litter-b {
+    0%, 43%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    48%       { transform: translate(0, -76px) rotate(-5deg); opacity: 1; }
+    52%       { transform: translate(280px, -76px) rotate(9deg); opacity: 1; }
+    54%       { transform: translate(280px, -76px) rotate(4deg); opacity: 1; }
+    57%       { transform: translate(280px, -60px) rotate(20deg); opacity: 0; }
+    58%, 94%  { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    100%      { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+
+@keyframes lp-litter-c {
+    0%, 73%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    78%       { transform: translate(0, -76px) rotate(-5deg); opacity: 1; }
+    82%       { transform: translate(168px, -76px) rotate(9deg); opacity: 1; }
+    84%       { transform: translate(168px, -76px) rotate(4deg); opacity: 1; }
+    87%       { transform: translate(168px, -60px) rotate(20deg); opacity: 0; }
+    88%, 94%  { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    100%      { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+
+/* Bag takes the impact just after each of the three drops, then settles. The
+   bounce lives in the keyframes, so the timing function must NOT overshoot: an
+   easing like cubic-bezier(.34,1.56,.64,1) reverses direction inside every
+   segment on top of the rebound below, and the bag reads as shaking rather than
+   absorbing a knock. */
 @keyframes lp-bag {
-    0%, 64%   { transform: scale(1, 1); }
-    69%       { transform: scale(1.035, 0.96); }
-    75%       { transform: scale(0.99, 1.015); }
-    82%, 100% { transform: scale(1, 1); }
+    0%, 26%   { transform: scale(1, 1); }
+    29%       { transform: scale(1.035, 0.96); }
+    33%       { transform: scale(0.99, 1.015); }
+    37%, 56%  { transform: scale(1, 1); }
+    59%       { transform: scale(1.035, 0.96); }
+    63%       { transform: scale(0.99, 1.015); }
+    67%, 86%  { transform: scale(1, 1); }
+    89%       { transform: scale(1.035, 0.96); }
+    93%       { transform: scale(0.99, 1.015); }
+    97%, 100% { transform: scale(1, 1); }
 }
 
-/* Three short ticks flicking off the bag mouth as the litter lands. */
+/* Three short ticks flicking off the bag mouth as each piece lands. */
 @keyframes lp-impact {
-    0%, 64%   { transform: scale(0.4); opacity: 0; }
-    70%       { transform: scale(1); opacity: 1; }
-    80%, 100% { transform: scale(1.45); opacity: 0; }
-}
-
-@keyframes lp-drift {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-9px); }
+    0%, 26%   { transform: scale(0.4); opacity: 0; }
+    29%       { transform: scale(1); opacity: 1; }
+    36%       { transform: scale(1.45); opacity: 0; }
+    37%, 56%  { transform: scale(0.4); opacity: 0; }
+    59%       { transform: scale(1); opacity: 1; }
+    66%       { transform: scale(1.45); opacity: 0; }
+    67%, 86%  { transform: scale(0.4); opacity: 0; }
+    89%       { transform: scale(1); opacity: 1; }
+    96%       { transform: scale(1.45); opacity: 0; }
+    97%, 100% { transform: scale(0.4); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -212,8 +273,16 @@
         animation: lp-jaw-right var(--lp-duration) cubic-bezier(0.45, 0, 0.25, 1) infinite;
     }
 
-    .lp-litter {
-        animation: lp-litter var(--lp-duration) cubic-bezier(0.45, 0, 0.25, 1) infinite;
+    .lp-litter-a {
+        animation: lp-litter-a var(--lp-duration) cubic-bezier(0.45, 0, 0.25, 1) infinite;
+    }
+
+    .lp-litter-b {
+        animation: lp-litter-b var(--lp-duration) cubic-bezier(0.45, 0, 0.25, 1) infinite;
+    }
+
+    .lp-litter-c {
+        animation: lp-litter-c var(--lp-duration) cubic-bezier(0.45, 0, 0.25, 1) infinite;
     }
 
     .lp-bag {
@@ -222,10 +291,6 @@
 
     .lp-impact {
         animation: lp-impact var(--lp-duration) cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
-    }
-
-    .lp-drift {
-        animation: lp-drift 9s ease-in-out infinite;
     }
 }
 
@@ -239,9 +304,18 @@
     transform-box: view-box;
 }
 
-/* The carried piece rotates about its own centre, not the viewBox origin. */
-.lp-litter {
+/* Each carried piece rotates about its own centre, not the viewBox origin. The
+   x of each origin is also where the arm parks to pick that piece up. */
+.lp-litter-a {
     transform-origin: 105px 293px;
+}
+
+.lp-litter-b {
+    transform-origin: 55px 295px;
+}
+
+.lp-litter-c {
+    transform-origin: 166px 292px;
 }
 
 .lp-impact {

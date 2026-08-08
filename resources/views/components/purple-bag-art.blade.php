@@ -6,10 +6,10 @@
      fanning down the shoulders. Light falls from the left, so the shadow face
      sits right of centre on both the body and the knot.
 
-     The leaf printed on the bag is a leaf, not the logo — the mark in
-     logo-mark.blade.php is a bare branch. Say the word and this becomes the
-     branch too; it is kept as a leaf here because a leaf reads at this size and
-     carries the "looking after the place" idea on its own.
+     The mark printed on the bag is the site logo — the disc and bare branch from
+     logo-mark.blade.php, the same artwork the header carries. It replaced a
+     drawn leaf so the two never drift apart; take any change to the mark from
+     logo-mark.blade.php rather than redrawing it here.
 
      The same paths appear in litter-picker-scene.blade.php inside a scaled
      group — edit both together. --}}
@@ -54,14 +54,21 @@
         <path d="M156 90C162 102 167 112 169 127" />
     </g>
 
-    {{-- leaf mark --}}
-    <g transform="translate(87 139) scale(1.9)">
-        <rect x="19.1" y="20" width="1.8" height="13.6" rx="0.9" fill="#fdf2fb" />
-        <path d="M20 5.8c8.6 5.6 8.6 17.4 0 23-8.6-5.6-8.6-17.4 0-23z" fill="#fdf2fb" />
-        <g stroke="#ba4eae" stroke-width="1.35" stroke-linecap="round">
-            <path d="M20 27.2V9.4" />
-            <path d="M20 15.4l5-3.4M20 21l5.2-3.5" />
-            <path d="M20 18.2l-5-3.4M20 23.8l-5.2-3.5" />
+    {{-- The logo, printed on the bag: the same disc-and-branch mark as
+         components/logo-mark.blade.php, scaled from its 40-unit box. Take any
+         change to the branch from there rather than redrawing it. Only the ink
+         is local: the disc takes the bag's own darkest purple instead of the
+         header's near-black and the branch the palette's off-white instead of
+         pure white, so the mark reads as printed on the plastic rather than a
+         black sticker punched through it. The geometry must not diverge. --}}
+    <g transform="translate(102 148) scale(1.4)">
+        <circle cx="20" cy="20" r="20" fill="#551f4f" />
+        <g stroke="#fdf2fb" stroke-linecap="round">
+            <path d="M20 33V9" stroke-width="3.4" />
+            <g stroke-width="3">
+                <path d="M20 26L11 18" />
+                <path d="M20 20L29 12" />
+            </g>
         </g>
     </g>
 </svg>

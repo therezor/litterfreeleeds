@@ -97,7 +97,7 @@
                 </div>
 
                 <div class="lg:col-span-5 lg:-mr-4 xl:-mr-8">
-                    <div class="lp-drift text-brand-950 dark:text-brand-100">
+                    <div class="text-brand-950 dark:text-brand-100">
                         <x-litter-picker-scene />
                     </div>
                 </div>

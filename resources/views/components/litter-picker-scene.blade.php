@@ -1,6 +1,8 @@
 {{--
-    The animated litter picker. A grabber descends, closes on a piece of litter,
-    lifts it, swings over the purple bag and drops it in — then resets.
+    The animated litter picker. Three pieces of litter lie on the ground; the
+    grabber works along them one at a time — descends, closes, lifts, swings over
+    the purple bag and drops the piece in — until the ground is clear, then the
+    loop resets with fresh litter.
 
     Drawn flat: solid two-tone fills (lit face + shadow face), no gradients, no
     blur, no soft shadows — the same screenprint language as the square buttons
@@ -9,10 +11,11 @@
 
     Motion lives in resources/css/app.css (.lp-* classes) so it can be disabled
     wholesale under prefers-reduced-motion; the static frame below still reads as
-    a complete illustration with no animation at all.
+    a complete illustration with no animation at all — the grabber stands over the
+    first piece with its jaws open and all three pieces are on the ground.
 --}}
 <svg class="lp-scene w-full h-auto" viewBox="0 0 440 380" fill="none" xmlns="http://www.w3.org/2000/svg"
-    role="img" aria-label="A litter picker grabs a piece of litter from the ground and drops it into a purple collection bag.">
+    role="img" aria-label="A litter picker clears three pieces of litter from the ground, dropping each one into a purple collection bag.">
 
     {{-- Flat poster disc behind the bag. cx + r must stay inside the 440-unit
          viewBox or the SVG viewport shears a flat edge off the disc's right. --}}
@@ -21,13 +24,9 @@
     {{-- Ground: a solid bar, not a soft ellipse --}}
     <rect x="14" y="302" width="412" height="7" fill="currentColor" opacity="0.85" />
 
-    {{-- Litter left behind, for context --}}
-    <rect x="40" y="288" width="30" height="14" fill="currentColor" opacity="0.35" />
-    <path d="M150 302l6-13 14 4 10-7 3 16z" fill="currentColor" opacity="0.28" />
-
     {{-- The purple bag, open-mouthed: this is the bag being filled, whereas
          components/purple-bag-art.blade.php is the same bag knotted shut and
-         left at a collection point. The two share the palette, the leaf mark and
+         left at a collection point. The two share the palette, the logo mark and
          the two-tone/crease idiom, but the paths are their own — a change to one
          does not propagate to the other.
 
@@ -63,20 +62,28 @@
                 <path d="M164 98C169 112 173 124 175 140" />
             </g>
 
-            {{-- leaf mark --}}
-            <g transform="translate(87 145) scale(1.9)">
-                <rect x="19.1" y="20" width="1.8" height="13.6" rx="0.9" fill="#fdf2fb" />
-                <path d="M20 5.8c8.6 5.6 8.6 17.4 0 23-8.6-5.6-8.6-17.4 0-23z" fill="#fdf2fb" />
-                <g stroke="#ba4eae" stroke-width="1.35" stroke-linecap="round">
-                    <path d="M20 27.2V9.4" />
-                    <path d="M20 15.4l5-3.4M20 21l5.2-3.5" />
-                    <path d="M20 18.2l-5-3.4M20 23.8l-5.2-3.5" />
+            {{-- The logo, printed on the bag: the same disc-and-branch mark as
+                 components/logo-mark.blade.php, scaled from its 40-unit box.
+                 Take any change to the branch from there rather than redrawing
+                 it. Only the ink is local: the disc takes the bag's own darkest
+                 purple instead of the header's near-black and the branch the
+                 palette's off-white instead of pure white, so the mark reads as
+                 printed on the plastic rather than a black sticker punched
+                 through it. The geometry must not diverge. --}}
+            <g transform="translate(102 142) scale(1.4)">
+                <circle cx="20" cy="20" r="20" fill="#551f4f" />
+                <g stroke="#fdf2fb" stroke-linecap="round">
+                    <path d="M20 33V9" stroke-width="3.4" />
+                    <g stroke-width="3">
+                        <path d="M20 26L11 18" />
+                        <path d="M20 20L29 12" />
+                    </g>
                 </g>
             </g>
         </g>
     </g>
 
-    {{-- Impact ticks, flicked off the bag mouth as the piece lands. Placed clear
+    {{-- Impact ticks, flicked off the bag mouth as each piece lands. Placed clear
          of the knot and its loose ends. --}}
     <g class="lp-impact" stroke="#e99edd" stroke-width="5" stroke-linecap="round" opacity="0">
         <path d="M294 182l-15-12" />
@@ -84,14 +91,37 @@
         <path d="M366 182l15-12" />
     </g>
 
-    {{-- Piece of litter being carried --}}
-    <g class="lp-litter">
-        <rect x="92" y="284" width="26" height="18" fill="#e11d48" />
-        <rect x="92" y="284" width="26" height="6" fill="#fda4af" />
+    {{-- The three pieces, in the order the grabber takes them: the can by the
+         grabber's feet, the tub off to the left, then the wrapper to the right.
+         All three sit *after* the bag in the DOM so a carried piece passes in
+         front of it on the way in rather than disappearing behind it — at rest
+         none of them overlaps the bag, so the static frame is unaffected.
+
+         Each piece's ground centre must line up with where the arm parks for it
+         (see the x offsets in lp-arm): 105, 55 and 166.
+
+         Greyed rather than coloured, so the litter stays the drab thing being
+         removed and the purple keeps the eye. The two greys are fixed, not
+         currentColor: a mid slate and a pale one that both hold their contrast
+         on the light page and the dark one. --}}
+    <g class="lp-litter lp-litter-a">
+        <rect x="92" y="284" width="26" height="18" fill="#64748b" />
+        <rect x="92" y="284" width="26" height="6" fill="#cbd5e1" />
+    </g>
+
+    <g class="lp-litter lp-litter-b">
+        <rect x="40" y="288" width="30" height="14" fill="#64748b" />
+        <rect x="40" y="288" width="30" height="5" fill="#cbd5e1" />
+    </g>
+
+    <g class="lp-litter lp-litter-c">
+        <path d="M150 302l6-13 14 4 10-7 3 16z" fill="#64748b" />
+        <path d="M156 289l14 4 10-7 1 5-11 5-13-4z" fill="#cbd5e1" />
     </g>
 
     {{-- The picker. Drawn low enough in the viewBox that the grip stays on canvas
-         when the arm lifts by 76px. --}}
+         when the arm lifts by 76px, and narrow enough that its full x travel
+         (-50 to +230 from here) keeps the jaws inside the 440-unit viewBox. --}}
     <g class="lp-arm">
         {{-- grip --}}
         <rect x="88" y="86" width="32" height="54" fill="#551f4f" />
