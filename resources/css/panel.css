@@ -41,6 +41,36 @@
     src: url('/fonts/oswald/oswald-latin.woff2') format('woff2');
 }
 
+/* ── Square everything ──────────────────────────────────────────────────────
+   The site's shape language is hard-edged; Filament's default is rounded-lg/xl.
+
+   Zeroing the radius scale is the root-cause fix: Filament's own CSS is compiled
+   against this theme, so every `rounded-*` in the vendor stylesheets — cards,
+   the login window, table containers, modals, dropdowns, badges, pagination —
+   resolves to 0 without a single override. It lives here rather than in
+   variables.css because that file is shared with the marketing site, which keeps
+   its tag-corner radii.
+
+   `rounded-full` compiles to a literal calc(infinity * 1px), not a token, so
+   avatars, toggles and loading spinners stay round. That is deliberate. */
+@theme {
+    --radius-xs: 0px;
+    --radius-sm: 0px;
+    --radius-md: 0px;
+    --radius-lg: 0px;
+    --radius-xl: 0px;
+    --radius-2xl: 0px;
+    --radius-3xl: 0px;
+    --radius-4xl: 0px;
+}
+
+/* The one radius the scale can't reach: Tailwind compiles the bare `rounded`
+   utility Filament uses on checkboxes to a hard-coded 0.25rem. */
+.fi-checkbox-input,
+.fi-ta-checkbox {
+    border-radius: 0 !important;
+}
+
 /* ── Surfaces ───────────────────────────────────────────────────────────── */
 .fi-layout,
 .fi-main {
@@ -52,12 +82,16 @@
     background-color: var(--app-bg-dark) !important;
 }
 
+/* .fi-ta-ctn is the table card itself; .fi-ta-content is only the inner row grid,
+   so styling that one leaves the card's own surface and corners untouched.
+   .fi-simple-main is the login / register / password-reset window. */
 .fi-sidebar,
 .fi-topbar,
 .fi-topbar-ctn,
 .fi-section,
 .fi-wi-stats-overview-stat,
-.fi-ta-content {
+.fi-ta-ctn,
+.fi-simple-main {
     background-color: var(--app-card-bg-light) !important;
 }
 
@@ -66,21 +100,9 @@
 .dark .fi-topbar-ctn,
 .dark .fi-section,
 .dark .fi-wi-stats-overview-stat,
-.dark .fi-ta-content {
+.dark .fi-ta-ctn,
+.dark .fi-simple-main {
     background-color: var(--app-card-bg-dark) !important;
-}
-
-/* ── Square everything ──────────────────────────────────────────────────────
-   The site's shape language is hard-edged; Filament's default is rounded-xl. */
-.fi-section,
-.fi-wi-stats-overview-stat,
-.fi-btn,
-.fi-input-wrp,
-.fi-sidebar-item-btn,
-.fi-ta-content,
-.fi-dropdown-panel,
-.fi-modal-window {
-    border-radius: 0 !important;
 }
 
 /* A stats-overview widget is a section wrapping bordered stat cards, so the
@@ -95,16 +117,50 @@
     padding-right: 0 !important;
 }
 
-/* ── Rules, not shadows ─────────────────────────────────────────────────── */
+/* ── Rules, not shadows ─────────────────────────────────────────────────────
+   Filament draws card edges as a 1px `ring` (a box-shadow, not a border), so
+   clearing box-shadow both removes the soft drop shadow and the hairline, and
+   the real 2px border replaces it. */
 .fi-section,
-.fi-wi-stats-overview-stat {
+.fi-wi-stats-overview-stat,
+.fi-ta-ctn,
+.fi-simple-main,
+.fi-input-wrp {
     border: 2px solid var(--app-line-light) !important;
     box-shadow: none !important;
 }
 
 .dark .fi-section,
-.dark .fi-wi-stats-overview-stat {
+.dark .fi-wi-stats-overview-stat,
+.dark .fi-ta-ctn,
+.dark .fi-simple-main,
+.dark .fi-input-wrp {
     border-color: var(--app-line-dark) !important;
+}
+
+/* Focus is the border going brand, rather than a second ring outside the one we
+   just replaced. brand-400 on the dark ground; brand-600 is too dark to read. */
+.fi-input-wrp:focus-within {
+    border-color: var(--color-brand-600) !important;
+}
+
+.dark .fi-input-wrp:focus-within {
+    border-color: var(--color-brand-400) !important;
+}
+
+.fi-input-wrp.fi-invalid,
+.dark .fi-input-wrp.fi-invalid {
+    border-color: var(--danger-600) !important;
+}
+
+/* The login window is the panel's one poster moment, so it gets the marketing
+   site's hard offset shadow instead of a flat rule. */
+.fi-simple-main {
+    box-shadow: 8px 8px 0 0 var(--color-ink-950) !important;
+}
+
+.dark .fi-simple-main {
+    box-shadow: 8px 8px 0 0 var(--color-brand-800) !important;
 }
 
 .fi-topbar {
@@ -128,7 +184,9 @@
 .fi-header-heading,
 .fi-section-header-heading,
 .fi-wi-stats-overview-stat-value,
-.fi-modal-heading {
+.fi-modal-heading,
+.fi-simple-header-heading,
+.fi-ta-header-heading {
     font-family: 'Oswald', var(--font-sans) !important;
     font-weight: 700 !important;
     text-transform: uppercase;
@@ -140,8 +198,20 @@
     font-size: 2.5rem !important;
 }
 
+.fi-simple-header-heading {
+    font-size: 2.25rem !important;
+}
+
 .fi-wi-stats-overview-stat-value {
     font-size: 2.5rem !important;
+}
+
+/* Buttons match x-action-button on the public site: bold, uppercase, wide
+   tracking. Filament's default is sentence-case medium. */
+.fi-btn {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
 }
 
 /* Sidebar brand wordmark */
@@ -166,12 +236,32 @@
     border-left-color: var(--color-brand-400);
 }
 
-/* Stat labels pick up the site's small-caps eyebrow treatment. */
-.fi-wi-stats-overview-stat-label {
+/* ── Labels ─────────────────────────────────────────────────────────────────
+   Every label that names a value — stat captions, form field labels, table
+   column headings — takes the site's small-caps eyebrow treatment, so they read
+   as one family instead of three different weights of sentence-case body text. */
+.fi-wi-stats-overview-stat-label,
+.fi-fo-field-label,
+.fi-in-entry-label,
+.fi-ta-header-cell,
+.fi-sc-section-label {
     text-transform: uppercase;
     letter-spacing: 0.14em;
     font-size: 0.7rem !important;
     font-weight: 700;
+}
+
+/* Filament pairs its header-cell size with a leading meant for 14px text; at
+   eyebrow size that line box is taller than the type needs. */
+.fi-ta-header-cell {
+    line-height: 1.4;
+}
+
+/* Sortable columns render their label inside a <button>, and the UA stylesheet
+   sets text-transform: none on form controls — so the eyebrow case has to be
+   restated here or sortable columns alone stay sentence case. */
+.fi-ta-header-cell-sort-btn {
+    text-transform: uppercase;
 }
 
 /* Custom variant for dark-mode handling in components */
