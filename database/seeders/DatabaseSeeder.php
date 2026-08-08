@@ -3,23 +3,37 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
+     *
+     * Order matters: postcodes must exist before any pick can be created.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $testUser = User::query()->firstOrCreate(
+            ['email' => 'test@example.com'],
+            User::factory()->raw(['name' => 'Test User', 'email' => 'test@example.com', 'password' => '12345678']),
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // A committed snapshot of the roles and permissions Shield generates, so
+        // a fresh clone and CI get them without running shield:generate. Re-run
+        // `shield:seeder --force` after adding any Filament resource.
+        $this->call([
+            ShieldSeeder::class,
+            LeedsPostcodeSeeder::class,
         ]);
+
+        if (app()->environment('local')) {
+            // ShieldSeeder brings the Super Admin role but deliberately no users,
+            // so without this a migrate:fresh --seed leaves nobody able to
+            // administer the panel.
+            $testUser->assignRole(config('filament-shield.super_admin.name'));
+
+            $this->call(DemoPicksSeeder::class);
+        }
     }
 }

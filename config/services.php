@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    /*
+     * Used only by the map on a pick's page. Without a key the map falls back
+     * to Google's keyless embed, which works but is not a documented endpoint.
+     */
+    'google_maps' => [
+        'key' => env('GOOGLE_MAPS_API_KEY'),
+    ],
+
 ];

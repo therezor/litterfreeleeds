@@ -48,5 +48,14 @@
                 Made with <x-heroicon-s-heart class="w-4 h-4 text-brand-400" /> by volunteers
             </p>
         </div>
+
+        {{-- Required by the Open Government Licence v3.0 covering the ONS
+             Postcode Directory that our pick locations are geocoded from. --}}
+        <p class="mt-6 text-xs leading-relaxed text-brand-100/35">
+            Postcode locations contain OS data &copy; Crown copyright and database right {{ date('Y') }}; Royal Mail
+            data &copy; Royal Mail copyright and database right {{ date('Y') }}; National Statistics data &copy; Crown
+            copyright and database right {{ date('Y') }}. Source: Office for National Statistics, licensed under the
+            Open Government Licence v.3.0.
+        </p>
     </div>
 </footer>
