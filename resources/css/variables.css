@@ -1,6 +1,54 @@
+/*
+ * Litter Free Leeds brand scale.
+ *
+ * Hued to the organisation's own printed material: the "Leeds Goes Purple"
+ * poster's field samples as #9b4391, a magenta-leaning purple (OKLCH hue 332).
+ * That is noticeably warmer than the violet the website's CSS uses (~hue 314),
+ * and the print colour is the one people actually recognise — so brand-600 is
+ * that exact value and the rest of the ramp is built on its hue.
+ *
+ * Mirrored in App\Providers\Filament\AppPanelProvider so the panel matches the
+ * marketing site — PHP cannot read this block, so keep the two in sync by hand.
+ *
+ * Accessibility (measured against white, and against --color-ink-950):
+ *   brand-600  5.82:1 on white  — the safe solid-button fill
+ *   brand-700  7.43:1 on white
+ *   brand-400  3.00:1 on white  — never a solid background under white text;
+ *                                 it earns its place as an accent, in the
+ *                                 artwork, and as text on black (6.59:1)
+ *   brand-300  9.78:1 on black  — the dark-mode accent
+ */
+@theme {
+    --color-brand-50: #fdf2fb;
+    --color-brand-100: #fbe1f6;
+    --color-brand-200: #f4c3ec;
+    --color-brand-300: #e99edd;
+    --color-brand-400: #d372c7;
+    --color-brand-500: #ba4eae;
+    --color-brand-600: #9b4391;
+    --color-brand-700: #88337f;
+    --color-brand-800: #6b2664;
+    --color-brand-900: #551f4f;
+    --color-brand-950: #3b1536;
+
+    /* Neutral near-blacks. Purple is the accent, not the ground: black surfaces
+       let the purple bag and the brand accents actually read as purple instead
+       of disappearing into a purple-tinted page. This also matches the poster,
+       which pairs the purple with a solid black logo and black rules. */
+    --color-ink-950: #0b0a0c;
+    --color-ink-900: #141317;
+    --color-ink-800: #1f1d22;
+    --color-ink-700: #2c2930;
+}
+
 :root {
-    --app-bg-light: #F9FAFB;
-    --app-bg-dark: #030712;
-    --app-card-bg-light: #FFFFFF;
-    --app-card-bg-dark: #111827;
+    /* Filament panel surfaces, consumed by panel.css. Matched to the marketing
+       site's neutral near-blacks rather than Tailwind's cold blue-greys, so the
+       dashboard and the public pages read as one product. */
+    --app-bg-light: #fafafa;
+    --app-bg-dark: #0b0a0c;
+    --app-card-bg-light: #ffffff;
+    --app-card-bg-dark: #141317;
+    --app-line-light: rgb(11 10 12 / 0.12);
+    --app-line-dark: rgb(255 255 255 / 0.12);
 }

@@ -1,7 +1,9 @@
 @import "tailwindcss";
 @import "./variables.css";
 
-/* Core @source for component class extraction in Tailwind v4 */
+/* Core @source for component class extraction in Tailwind v4.
+   Deliberately wide — Filament extracts its own utility classes from vendor
+   Blade, so narrowing these breaks the panel's styling. */
 @source "../../vendor/filament/**/*.blade.php";
 @source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
 @source "../../storage/framework/views/*.php";
@@ -19,7 +21,27 @@
 @import "../../vendor/filament/tables/resources/css/index.css";
 @import "../../vendor/filament/widgets/resources/css/index.css";
 
-/* Background color overrides using global variables from variables.css */
+/* ──────────────────────────────────────────────────────────────────────────
+   Litter Free Leeds panel theme.
+
+   Brings the dashboard into the marketing site's language: neutral near-black
+   surfaces (not Tailwind's blue-greys), square corners, 2px rules instead of
+   soft shadows, and Oswald for headings. The brand palette itself is registered
+   in AppPanelProvider, so colour is already correct — this file is structure.
+   -------------------------------------------------------------------------- */
+
+/* Oswald, self-hosted alongside the public site. Referenced by absolute public
+   path rather than a Filament font provider: Panel::font() would switch to the
+   Bunny CDN provider, which is the dependency the site deliberately removed. */
+@font-face {
+    font-family: 'Oswald';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 200 700;
+    src: url('/fonts/oswald/oswald-latin.woff2') format('woff2');
+}
+
+/* ── Surfaces ───────────────────────────────────────────────────────────── */
 .fi-layout,
 .fi-main {
     background-color: var(--app-bg-light) !important;
@@ -31,16 +53,126 @@
 }
 
 .fi-sidebar,
-.fi-card,
+.fi-topbar,
+.fi-topbar-ctn,
+.fi-section,
+.fi-wi-stats-overview-stat,
 .fi-ta-content {
     background-color: var(--app-card-bg-light) !important;
 }
 
 .dark .fi-sidebar,
-.dark .fi-card,
+.dark .fi-topbar,
+.dark .fi-topbar-ctn,
+.dark .fi-section,
+.dark .fi-wi-stats-overview-stat,
 .dark .fi-ta-content {
     background-color: var(--app-card-bg-dark) !important;
 }
 
-/* Custom variant for dark mode handling in components */
+/* ── Square everything ──────────────────────────────────────────────────────
+   The site's shape language is hard-edged; Filament's default is rounded-xl. */
+.fi-section,
+.fi-wi-stats-overview-stat,
+.fi-btn,
+.fi-input-wrp,
+.fi-sidebar-item-btn,
+.fi-ta-content,
+.fi-dropdown-panel,
+.fi-modal-window {
+    border-radius: 0 !important;
+}
+
+/* A stats-overview widget is a section wrapping bordered stat cards, so the
+   section's own border draws a redundant box around just the heading. */
+.fi-section:has(.fi-wi-stats-overview-stat) {
+    border: 0 !important;
+    background-color: transparent !important;
+}
+
+.fi-section:has(.fi-wi-stats-overview-stat) .fi-section-header {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* ── Rules, not shadows ─────────────────────────────────────────────────── */
+.fi-section,
+.fi-wi-stats-overview-stat {
+    border: 2px solid var(--app-line-light) !important;
+    box-shadow: none !important;
+}
+
+.dark .fi-section,
+.dark .fi-wi-stats-overview-stat {
+    border-color: var(--app-line-dark) !important;
+}
+
+.fi-topbar {
+    border-bottom: 2px solid var(--app-line-light) !important;
+    box-shadow: none !important;
+}
+
+.dark .fi-topbar {
+    border-bottom-color: var(--app-line-dark) !important;
+}
+
+.fi-sidebar {
+    border-right: 2px solid var(--app-line-light) !important;
+}
+
+.dark .fi-sidebar {
+    border-right-color: var(--app-line-dark) !important;
+}
+
+/* ── Display type ───────────────────────────────────────────────────────── */
+.fi-header-heading,
+.fi-section-header-heading,
+.fi-wi-stats-overview-stat-value,
+.fi-modal-heading {
+    font-family: 'Oswald', var(--font-sans) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: -0.005em;
+    line-height: 1;
+}
+
+.fi-header-heading {
+    font-size: 2.5rem !important;
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 2.5rem !important;
+}
+
+/* Sidebar brand wordmark */
+.fi-sidebar-header .fi-logo,
+.fi-topbar .fi-logo {
+    font-family: 'Oswald', var(--font-sans) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+}
+
+/* ── Navigation ─────────────────────────────────────────────────────────── */
+.fi-sidebar-item-btn {
+    border-left: 3px solid transparent;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn {
+    border-left-color: var(--color-brand-600);
+}
+
+.dark .fi-sidebar-item.fi-active .fi-sidebar-item-btn {
+    border-left-color: var(--color-brand-400);
+}
+
+/* Stat labels pick up the site's small-caps eyebrow treatment. */
+.fi-wi-stats-overview-stat-label {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.7rem !important;
+    font-weight: 700;
+}
+
+/* Custom variant for dark-mode handling in components */
 @variant dark (&:where(.dark, .dark *));

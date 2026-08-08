@@ -8,13 +8,255 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* 'Inter Variable' is the family name Filament self-hosts at
+       public/fonts/filament/filament/inter/index.css — linked from the layout. */
+    --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Oswald: the condensed display face litterfreeleeds.co.uk actually uses.
+       Self-hosted at public/fonts/oswald/. Headlines only — body stays Inter. */
+    --font-display: 'Oswald', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Decorative dot field. Inherits the current text colour, so tint it with
+   text-* / opacity utilities at the call site. */
+@utility bg-dot-grid {
+    background-image: radial-gradient(currentColor 1.5px, transparent 1.5px);
+    background-size: 28px 28px;
+}
+
+/* Fades a decorative layer out towards the edges so a grid/dot field doesn't
+   collide with the section boundary. */
+@utility mask-hero-fade {
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black, transparent);
+}
+
+/* Fine grid used behind the hero — texture that isn't another blur. */
+@utility bg-line-grid {
+    background-image:
+        linear-gradient(to right, currentColor 1px, transparent 1px),
+        linear-gradient(to bottom, currentColor 1px, transparent 1px);
+    background-size: 72px 72px;
+}
+
+/* Condensed display type wants tighter tracking and a shorter line box than
+   Tailwind's defaults give it. */
+@utility display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    line-height: 0.92;
+    text-transform: uppercase;
+}
+
+/* Paper grain. Kills the flat "screen" feel that makes utility-CSS layouts read
+   as templates. Sits over a surface at low opacity via a pseudo-element. */
+@utility grain {
+    position: relative;
+}
+
+@utility grain-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+/* The bag/tag silhouette: square except one deeply cut corner. Used on cards and
+   panels instead of a uniform rounded-3xl. */
+@utility tag-corner {
+    border-radius: 0 2.25rem 0 2.25rem;
+}
+
+@utility tag-corner-alt {
+    border-radius: 2.25rem 0 2.25rem 0;
+}
+
+/* Hard offset shadow — the poster/print device this design leans on.
+   NOTE: written as real utilities because Tailwind v4 does not resolve
+   theme() inside arbitrary values like shadow-[6px_6px_0_0_theme(...)];
+   that silently generates no CSS at all. */
+@utility shadow-hard {
+    box-shadow: 6px 6px 0 0 var(--color-ink-950);
+}
+
+@utility shadow-hard-sm {
+    box-shadow: 3px 3px 0 0 var(--color-ink-950);
+}
+
+/* Dark-mode counterpart. A translucent white offset reads as a stray grey box
+   on a near-black page, so the shadow is a deep tone of the brand instead. */
+@utility shadow-hard-light {
+    box-shadow: 6px 6px 0 0 var(--color-brand-800);
+}
+
+@utility shadow-hard-light-sm {
+    box-shadow: 3px 3px 0 0 var(--color-brand-800);
+}
+
+/* For light buttons on dark panels: brand-950 on brand-950 is invisible. */
+@utility shadow-hard-ink {
+    box-shadow: 6px 6px 0 0 rgb(0 0 0 / 0.38);
+}
+
+@utility shadow-hard-ink-sm {
+    box-shadow: 3px 3px 0 0 rgb(0 0 0 / 0.38);
+}
+
 [x-cloak] {
     display: none !important;
+}
+
+/* ── Marquee ──────────────────────────────────────────────────────────────
+   Two identical tracks scrolling as one; the second covers the seam. Width is
+   set by content, so the loop distance is exactly one track (-50%).
+   -------------------------------------------------------------------------- */
+@keyframes marquee-track {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+.marquee-inner {
+    display: flex;
+    width: max-content;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .marquee-inner {
+        animation: marquee-track 38s linear infinite;
+    }
+}
+
+/* ── Litter picker scene ──────────────────────────────────────────────────
+   One 7s loop: the grabber descends, closes on a piece of litter, lifts,
+   swings over the bag, releases, and returns. Every animated part shares the
+   same duration and timeline so the phases stay locked together — change the
+   duration on .lp-scene and the whole cycle scales.
+   -------------------------------------------------------------------------- */
+.lp-scene {
+    --lp-duration: 7s;
+}
+
+@keyframes lp-arm {
+    0%, 4%    { transform: translate(0, -76px); }
+    16%, 26%  { transform: translate(0, 0); }
+    40%       { transform: translate(0, -76px); }
+    52%, 62%  { transform: translate(230px, -76px); }
+    76%, 100% { transform: translate(0, -76px); }
+}
+
+/* The jaws are drawn open, so the untransformed frame reads as "about to grab".
+   y points down, so a positive rotation swings the left jaw further out — the
+   left jaw closes on negative angles and the right one on positive. Closed from
+   26% (on the ground, around the litter) to 58% (over the bag, letting go). */
+@keyframes lp-jaw-left {
+    0%, 20%   { transform: rotate(0deg); }
+    26%, 58%  { transform: rotate(-16deg); }
+    64%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes lp-jaw-right {
+    0%, 20%   { transform: rotate(0deg); }
+    26%, 58%  { transform: rotate(16deg); }
+    64%, 100% { transform: rotate(0deg); }
+}
+
+/* The carried piece of litter. Its X/Y track mirrors lp-arm while gripped; the
+   small rotations read as the piece swinging in the jaws, then tipping as it
+   falls. It fades out inside the bag and a fresh piece fades in on the ground. */
+@keyframes lp-litter {
+    0%, 26%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    40%       { transform: translate(0, -76px) rotate(-5deg); opacity: 1; }
+    52%       { transform: translate(230px, -76px) rotate(9deg); opacity: 1; }
+    60%       { transform: translate(230px, -76px) rotate(4deg); opacity: 1; }
+    67%       { transform: translate(230px, -60px) rotate(20deg); opacity: 0; }
+    68%, 84%  { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    100%      { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+
+/* Bag takes the impact just after the drop, then settles. The bounce lives in
+   the keyframes, so the timing function must NOT overshoot: an easing like
+   cubic-bezier(.34,1.56,.64,1) reverses direction inside every segment on top of
+   the rebound below, and the bag reads as shaking rather than absorbing a knock. */
+@keyframes lp-bag {
+    0%, 64%   { transform: scale(1, 1); }
+    69%       { transform: scale(1.035, 0.96); }
+    75%       { transform: scale(0.99, 1.015); }
+    82%, 100% { transform: scale(1, 1); }
+}
+
+/* Three short ticks flicking off the bag mouth as the litter lands. */
+@keyframes lp-impact {
+    0%, 64%   { transform: scale(0.4); opacity: 0; }
+    70%       { transform: scale(1); opacity: 1; }
+    80%, 100% { transform: scale(1.45); opacity: 0; }
+}
+
+@keyframes lp-drift {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-9px); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .lp-arm {
+        animation: lp-arm var(--lp-duration) cubic-bezier(0.45, 0, 0.25, 1) infinite;
+    }
+
+    .lp-jaw-left {
+        animation: lp-jaw-left var(--lp-duration) cubic-bezier(0.45, 0, 0.25, 1) infinite;
+    }
+
+    .lp-jaw-right {
+        animation: lp-jaw-right var(--lp-duration) cubic-bezier(0.45, 0, 0.25, 1) infinite;
+    }
+
+    .lp-litter {
+        animation: lp-litter var(--lp-duration) cubic-bezier(0.45, 0, 0.25, 1) infinite;
+    }
+
+    .lp-bag {
+        animation: lp-bag var(--lp-duration) cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+    }
+
+    .lp-impact {
+        animation: lp-impact var(--lp-duration) cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+    }
+
+    .lp-drift {
+        animation: lp-drift 9s ease-in-out infinite;
+    }
+}
+
+/* SVG transforms must resolve against viewBox units, not the element's own box. */
+.lp-arm,
+.lp-jaw-left,
+.lp-jaw-right,
+.lp-litter,
+.lp-impact,
+.lp-bag {
+    transform-box: view-box;
+}
+
+/* The carried piece rotates about its own centre, not the viewBox origin. */
+.lp-litter {
+    transform-origin: 105px 293px;
+}
+
+.lp-impact {
+    transform-origin: 330px 200px;
+}
+
+.lp-jaw-left {
+    transform-origin: 104px 252px;
+}
+
+.lp-jaw-right {
+    transform-origin: 104px 252px;
+}
+
+.lp-bag {
+    transform-origin: 330px 300px;
 }
 

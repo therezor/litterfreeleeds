@@ -18,8 +18,8 @@ class PersonalWeekdayChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => 'Bags Collected',
+                    // See CommunityImpactChart: inherits the panel's 'primary' colour.
                     'data' => [2, 1, 0, 1, 3, 8, 12],
-                    'backgroundColor' => '#9333ea',
                 ],
             ],
             'labels' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],

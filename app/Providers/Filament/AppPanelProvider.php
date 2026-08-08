@@ -30,8 +30,28 @@ class AppPanelProvider extends PanelProvider
             ->registration()
             ->passwordReset()
             ->emailVerification()
+            ->brandName('Litter Free Leeds')
+            ->brandLogo(fn (): string => asset('favicon.svg'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(fn (): string => asset('favicon.svg'))
             ->colors([
-                'primary' => Color::Purple,
+                // Litter Free Leeds brand scale, mirrored from the @theme block in
+                // resources/css/variables.css — keep the two in sync by hand.
+                // Passing the explicit shade array (rather than a single hex string)
+                // preserves these exact colours; a string would only keep the hue.
+                'primary' => [
+                    50 => '#fdf2fb',
+                    100 => '#fbe1f6',
+                    200 => '#f4c3ec',
+                    300 => '#e99edd',
+                    400 => '#d372c7',
+                    500 => '#ba4eae',
+                    600 => '#9b4391',
+                    700 => '#88337f',
+                    800 => '#6b2664',
+                    900 => '#551f4f',
+                    950 => '#3b1536',
+                ],
                 'gray' => Color::Gray,
             ])
             ->viteTheme('resources/css/panel.css')
