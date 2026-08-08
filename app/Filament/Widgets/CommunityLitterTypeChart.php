@@ -8,7 +8,7 @@ class CommunityLitterTypeChart extends ChartWidget
 {
     protected static ?int $sort = 6;
 
-    protected int | string | array $columnSpan = 'half';
+    protected int|string|array $columnSpan = 'half';
 
     protected ?string $heading = 'Litter Type Distribution';
 

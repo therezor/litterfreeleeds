@@ -8,7 +8,7 @@ class PersonalWeekdayChart extends ChartWidget
 {
     protected static ?int $sort = 3;
 
-    protected int | string | array $columnSpan = 'half';
+    protected int|string|array $columnSpan = 'half';
 
     protected ?string $heading = 'Activity by Weekday';
 

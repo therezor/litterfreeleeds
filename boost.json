@@ -1,7 +1,5 @@
 {
-    "agents": [
-        "gemini"
-    ],
+    "agents": [],
     "guidelines": true,
     "mcp": true,
     "nightwatch_mcp": false,

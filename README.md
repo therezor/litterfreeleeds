@@ -62,6 +62,23 @@ This app provides a management platform for:
    picks can be created straight away, and makes `test@example.com` a Super Admin locally. Tests must run through Sail — `.env` points at the
    `pgsql` container hostname, which does not resolve from the host.
 
+### Checks
+
+```bash
+composer lint        # Pint — fix code style
+composer lint:test   # Pint — report style violations without fixing
+composer analyse     # PHPStan (level 5, via Larastan)
+vendor/bin/sail test # PHPUnit — must go through Sail for the database
+```
+
+GitHub Actions runs `lint:test`, `analyse` and the tests on every push to `main` and every pull request
+(`.github/workflows/ci.yml`), against a Postgres 18 service container matching
+`compose.yaml`.
+
+Static analysis findings that predate PHPStan being added are parked in
+`phpstan-baseline.neon`. New code is expected to be clean; the baseline shrinks
+by fixing entries and regenerating, not by lowering the level.
+
 ## Postcode data
 
 Pick locations are geocoded offline from the **ONS Postcode Directory (ONSPD)** — there are

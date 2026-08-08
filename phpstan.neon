@@ -1,0 +1,18 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 5
+
+    paths:
+        - app
+        - config
+        - database
+        - routes
+        - tests
+
+    # Regenerated wholesale by `artisan shield:generate --seeder`; anything we
+    # silenced here would come back on the next run.
+    excludePaths:
+        - database/seeders/ShieldSeeder.php

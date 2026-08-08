@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Lint, analyse & test
+    runs-on: ubuntu-latest
+
+    # Postgres, not SQLite: withDistanceFrom() leans on radians()/acos(), which
+    # SQLite has no answer for. Matches the pgsql service in compose.yaml.
+    services:
+      pgsql:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: sail
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -q -d testing -U sail"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # DB_DATABASE is deliberately absent — phpunit.xml pins it to "testing",
+      # and a real environment variable would win over it.
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USERNAME: sail
+      DB_PASSWORD: password
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, bcmath, intl, zip
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      # .env must exist before install: post-autoload-dump runs package:discover
+      # and filament:upgrade, both of which boot the framework.
+      - name: Install PHP dependencies
+        run: |
+          cp .env.example .env
+          composer install --prefer-dist --no-interaction --no-progress
+          php artisan key:generate
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # public/build is gitignored, and the app layout calls @vite — without
+      # this the feature tests fail on a missing manifest.
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Check code style
+        run: composer run lint:test
+
+      - name: Run static analysis
+        run: composer run analyse
+
+      - name: Run tests
+        run: composer run test
