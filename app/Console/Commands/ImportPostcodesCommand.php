@@ -346,9 +346,13 @@ class ImportPostcodesCommand extends Command
 
         $names = [];
 
+        // CATCH_GET_CHILD so one unreadable subdirectory is stepped over rather
+        // than aborting the whole import — pointing at a CSV sitting in a shared
+        // directory is enough to walk into something we have no rights to.
         $files = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($this->searchRoot, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
+            RecursiveIteratorIterator::SELF_FIRST,
+            RecursiveIteratorIterator::CATCH_GET_CHILD
         );
         // The lookups are never deep, and Data/multi_csv holds 120 files we
         // have no interest in walking into.

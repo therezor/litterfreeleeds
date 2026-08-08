@@ -63,7 +63,14 @@ class WardImportTest extends TestCase
 
     public function test_it_warns_when_a_release_has_no_ward_column(): void
     {
-        $path = tempnam(sys_get_temp_dir(), 'onspd').'.csv';
+        // In its own directory, not loose in the system temp: the importer
+        // searches the CSV's parent for the lookup files, and a shared temp
+        // directory holds other people's folders we cannot read.
+        $directory = tempnam(sys_get_temp_dir(), 'onspd');
+        unlink($directory);
+        mkdir($directory);
+
+        $path = $directory.'/ONSPD_TEST_UK.csv';
         file_put_contents($path, "pcds,doterm,lat,long\nLS6 2AB,,53.8155,-1.568\n");
 
         $this->artisan('postcodes:import', ['path' => $path])
@@ -74,6 +81,7 @@ class WardImportTest extends TestCase
         $this->assertNull(Postcode::find('LS62AB')->ward_code);
 
         unlink($path);
+        rmdir($directory);
     }
 
     public function test_a_pick_reads_its_ward_through_its_postcode(): void
