@@ -8,6 +8,9 @@
         'contact-us' => ['label' => 'Contact Us', 'url' => url('/contact-us')],
     ];
 
+    $accountUrl = auth()->check() ? url('/app') : url('/app/login');
+    $accountLabel = auth()->check() ? 'Dashboard' : 'Log In';
+
     // Underline-on-rule nav rather than pill buttons — pills are the tell.
     $base = 'relative py-1 text-[0.95rem] font-semibold tracking-wide transition-colors';
     $on = $base . ' text-ink-950 dark:text-white after:absolute after:-bottom-px after:left-0 after:right-0 after:h-[3px] after:bg-brand-600 dark:after:bg-brand-400';
@@ -43,9 +46,9 @@
                     <x-heroicon-s-sun x-cloak x-show="darkMode" class="w-5 h-5" />
                 </button>
 
-                <a href="{{ auth()->check() ? url('/app') : url('/app/login') }}"
+                <a href="{{ $accountUrl }}"
                     class="hidden sm:inline-flex items-center px-5 py-2.5 text-sm font-bold uppercase tracking-wider text-ink-950 dark:text-white border-2 border-ink-950 dark:border-white/40 hover:bg-ink-950 hover:text-white dark:hover:bg-white dark:hover:text-ink-950 transition-colors">
-                    {{ auth()->check() ? 'Dashboard' : 'Log In' }}
+                    {{ $accountLabel }}
                 </a>
 
                 <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" aria-label="Toggle navigation"
@@ -65,8 +68,8 @@
                 <a href="{{ $link['url'] }}"
                     class="display block py-3 text-2xl {{ $active === $key ? 'text-brand-700 dark:text-brand-300' : 'text-ink-950 dark:text-white' }}">{{ $link['label'] }}</a>
             @endforeach
-            <a href="{{ auth()->check() ? url('/app') : url('/app/login') }}"
-                class="display block py-3 text-2xl text-ink-950 dark:text-white sm:hidden">{{ auth()->check() ? 'Dashboard' : 'Log In' }}</a>
+            <a href="{{ $accountUrl }}"
+                class="display block py-3 text-2xl text-ink-950 dark:text-white sm:hidden">{{ $accountLabel }}</a>
         </div>
     </div>
 </header>

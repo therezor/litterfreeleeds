@@ -174,4 +174,22 @@ class CommunityPickResourceTest extends TestCase
                     && ! array_key_exists($withoutRole->getKey(), $field->getOptions()),
             );
     }
+
+    /**
+     * Registration gives every public sign-up the Picker role, so "holds any
+     * role" is no longer enough to keep strangers out of this list.
+     */
+    public function test_a_picker_cannot_be_made_responsible_for_a_pick(): void
+    {
+        Postcode::factory()->withPostcode('LS6 2AB')->create();
+        $withRole = $this->userWithPermissions('ViewAny:CommunityPick', 'Create:CommunityPick');
+        $picker = User::factory()->picker()->create();
+
+        Livewire::actingAs($withRole)
+            ->test(CreateCommunityPick::class)
+            ->assertFormFieldExists(
+                'responsible_user_id',
+                fn ($field): bool => ! array_key_exists($picker->getKey(), $field->getOptions()),
+            );
+    }
 }

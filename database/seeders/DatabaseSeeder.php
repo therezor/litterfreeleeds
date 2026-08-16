@@ -24,6 +24,9 @@ class DatabaseSeeder extends Seeder
         // `shield:seeder --force` after adding any Filament resource.
         $this->call([
             ShieldSeeder::class,
+            // After ShieldSeeder: it grants Onboard:User to the Super Admin
+            // role, which ShieldSeeder's snapshot creates.
+            VolunteerRolesSeeder::class,
             LeedsPostcodeSeeder::class,
         ]);
 

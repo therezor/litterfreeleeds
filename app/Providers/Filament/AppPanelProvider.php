@@ -26,8 +26,16 @@ class AppPanelProvider extends PanelProvider
             ->id('app')
             ->path('app')
             ->login()
-            ->registration()
+            // No ->registration(): volunteers sign up at /join, which collects a
+            // postcode and consent and matches them to a bag holder. /app/register
+            // redirects there. Staff accounts are created in the panel.
             ->passwordReset()
+            // With User implementing MustVerifyEmail, this is what an unverified
+            // volunteer sees the moment they sign in: a "confirm your email"
+            // prompt with a rate-limited resend button, instead of the panel.
+            // The resend runs through User::sendEmailVerificationNotification(),
+            // so a volunteer gets the welcome email again rather than a bare
+            // verification link.
             ->emailVerification()
             ->brandName('Litter Free Leeds')
             ->brandLogo(fn (): string => asset('favicon.svg'))

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\CommunityPicks\Schemas;
 
 use App\Models\District;
 use App\Models\Postcode;
+use App\Models\User;
 use App\Models\Ward;
 use App\Rules\KnownUkPostcode;
 use Filament\Forms\Components\DatePicker;
@@ -101,16 +102,25 @@ class CommunityPickForm
                             })
                             ->helperText('Worked out from the postcode. Empty until an ONSPD release has been imported.'),
 
-                        // Scoped to users who hold a role: the panel allows open
-                        // registration, so an unscoped list would offer every
-                        // stranger who has ever signed up.
+                        // Scoped to users who hold a role OTHER than Picker.
+                        // "Holds any role" used to be enough, because registration
+                        // left volunteers roleless — but every public registrant is
+                        // now a Picker, so that test would offer every stranger who
+                        // has ever signed up.
                         Select::make('responsible_user_id')
                             ->label('Responsible person')
-                            ->relationship('responsibleUser', 'name', fn (Builder $query) => $query->whereHas('roles'))
+                            ->relationship(
+                                'responsibleUser',
+                                'name',
+                                fn (Builder $query) => $query->whereHas(
+                                    'roles',
+                                    fn (Builder $roles) => $roles->whereNot('name', User::ROLE_PICKER),
+                                ),
+                            )
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->helperText('Only volunteers with a role can be made responsible for a pick.'),
+                            ->helperText('Bag holders, organisers and admins can be made responsible for a pick.'),
                     ])
                     ->columns(2),
 

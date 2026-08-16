@@ -31,7 +31,7 @@
                                 city.
                             </p>
                             <div class="mt-8">
-                                <x-action-button :href="url('/app/register')" variant="invert">
+                                <x-action-button :href="route('join.create')" variant="invert">
                                     Create an account
                                 </x-action-button>
                             </div>

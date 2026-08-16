@@ -81,7 +81,7 @@
                     </p>
 
                     <div class="mt-9 flex flex-wrap items-center gap-4">
-                        <a href="{{ url('/app/register') }}"
+                        <a href="{{ route('join.create') }}"
                             class="group inline-flex items-center gap-3 px-8 py-4 bg-brand-700 dark:bg-brand-400 text-white dark:text-brand-950 text-base font-bold uppercase tracking-wider shadow-hard dark:shadow-hard-light hover:shadow-hard-sm dark:hover:shadow-hard-light-sm hover:translate-x-[3px] hover:translate-y-[3px] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
                             Join us now
                             <x-heroicon-o-arrow-right class="w-5 h-5 group-hover:translate-x-1 transition-transform" />

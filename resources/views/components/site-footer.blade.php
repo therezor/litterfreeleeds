@@ -32,7 +32,7 @@
 
             <div class="lg:col-span-3">
                 <h2 class="text-xs font-bold uppercase tracking-[0.22em] text-brand-300 mb-5">Join in</h2>
-                <a href="{{ url('/app/register') }}"
+                <a href="{{ route('join.create') }}"
                     class="inline-flex items-center gap-2 px-6 py-3 border-2 border-brand-300 text-brand-100 text-sm font-bold uppercase tracking-wider hover:bg-brand-300 hover:text-brand-950 transition-colors">
                     Become a volunteer
                     <x-heroicon-o-arrow-right class="w-4 h-4" />

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasCoordinates;
 use App\Observers\CommunityPickObserver;
 use Carbon\CarbonImmutable;
 use Database\Factories\CommunityPickFactory;
@@ -23,6 +24,8 @@ use Illuminate\Support\Uri;
  * Note there is deliberately no #[RouteKey('slug')] — Filament resolves admin
  * records through getRouteKeyName() too, so that attribute would rewrite every
  * /app URL as well. The public route binds by slug explicitly instead.
+ *
+ * @property-read float|null $distance_miles Only present when the query used withDistanceFrom().
  */
 #[Fillable([
     'name',
@@ -40,7 +43,7 @@ use Illuminate\Support\Uri;
 class CommunityPick extends Model
 {
     /** @use HasFactory<CommunityPickFactory> */
-    use HasFactory;
+    use HasCoordinates, HasFactory;
 
     /**
      * Leeds is in Europe/London but config('app.timezone') is UTC. Deciding
@@ -141,33 +144,6 @@ class CommunityPick extends Model
         $query->where('date', '<', self::todayInLeeds())
             ->orderByDesc('date')
             ->orderByDesc('time_from');
-    }
-
-    /**
-     * Adds a distance_miles column measured from the given point. Haversine over
-     * a few dozen rows — no spatial extension, no bounding box. The clamp keeps
-     * acos() from returning NaN when floating point overshoots 1 for a pick
-     * sitting on the exact point being searched from.
-     *
-     * Callers wanting distance to be the primary sort must reorder() first —
-     * the upcoming() scope has already applied a date ordering.
-     */
-    #[Scope]
-    protected function withDistanceFrom(Builder $query, float $latitude, float $longitude): void
-    {
-        // selectRaw only appends, so without this the raw expression would be
-        // the entire select list when no columns have been chosen yet.
-        if (blank($query->getQuery()->columns)) {
-            $query->select($this->getTable().'.*');
-        }
-
-        $query->selectRaw(
-            '3959 * acos(least(1.0, greatest(-1.0,'
-            .' cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?))'
-            .' + sin(radians(?)) * sin(radians(latitude))'
-            .'))) as distance_miles',
-            [$latitude, $longitude, $latitude]
-        )->withCasts(['distance_miles' => 'float']);
     }
 
     /**

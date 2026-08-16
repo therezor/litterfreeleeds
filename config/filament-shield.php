@@ -1,6 +1,8 @@
 <?php
 
 declare(strict_types=1);
+use App\Filament\Resources\Onboardings\OnboardingResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -170,16 +172,30 @@ return [
     'resources' => [
         'subject' => 'model',
         'manage' => [
-            // RoleResource::class => [
-            //     'viewAny',
-            //     'view',
-            //     'create',
-            //     'update',
-            //     'delete',
-            // ],
+            // Merged into policies.methods (policies.merge is true) and
+            // pascal-formatted, giving the Onboard:User permission and a
+            // matching checkbox under Users in the role editor.
+            //
+            // Onboarding is its own permission rather than a use of
+            // Update:User because UserForm exposes the roles multi-select and
+            // the password field — a bag holder holding Update:User could make
+            // themselves Super Admin. This one only stamps onboarded_at.
+            UserResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
+                'delete',
+                'deleteAny',
+                'onboard',
+            ],
         ],
         'exclude' => [
-            //
+            // A second resource over the User model. Shield names permissions
+            // after the model, so leaving it in would generate a second,
+            // colliding set of `:User` permissions. It gates itself on the
+            // Onboard:User permission generated above.
+            OnboardingResource::class,
         ],
     ],
 

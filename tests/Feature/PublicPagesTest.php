@@ -8,7 +8,10 @@ class PublicPagesTest extends TestCase
 {
     public function test_every_public_page_renders(): void
     {
-        $paths = ['/', '/upcoming-picks', '/about', '/contact-us', '/privacy-policy', '/site-map'];
+        $paths = [
+            '/', '/upcoming-picks', '/about', '/contact-us', '/privacy-policy',
+            '/site-map', '/join', '/purple-bag-conditions',
+        ];
 
         foreach ($paths as $path) {
             $this->get($path)->assertOk();
@@ -19,7 +22,7 @@ class PublicPagesTest extends TestCase
     {
         $response = $this->get('/');
 
-        foreach (['/upcoming-picks', '/about', '/contact-us', '/privacy-policy', '/site-map'] as $path) {
+        foreach (['/upcoming-picks', '/about', '/contact-us', '/privacy-policy', '/site-map', '/join'] as $path) {
             $response->assertSee(url($path));
         }
     }

@@ -8,7 +8,8 @@
         ],
         'Volunteer area' => [
             ['label' => 'Log In', 'url' => url('/app/login'), 'detail' => 'Access your dashboard'],
-            ['label' => 'Create Account', 'url' => url('/app/register'), 'detail' => 'Register as a volunteer'],
+            ['label' => 'Create Account', 'url' => route('join.create'), 'detail' => 'Register as a volunteer'],
+            ['label' => 'Purple Bag Conditions', 'url' => route('purple-bag-conditions'), 'detail' => 'How to use purple bags safely'],
         ],
         'Legal' => [
             ['label' => 'Privacy Policy', 'url' => url('/privacy-policy'), 'detail' => 'How we handle your data'],
