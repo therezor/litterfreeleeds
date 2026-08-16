@@ -12,6 +12,8 @@
 /.vscode
 /.zed
 /auth.json
+# Carries the production host, paths and service names — kept out of the repo.
+/deploy.sh
 /node_modules
 /public/build
 /public/hot
