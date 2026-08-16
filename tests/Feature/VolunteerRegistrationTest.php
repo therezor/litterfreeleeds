@@ -5,21 +5,20 @@ namespace Tests\Feature;
 use App\Models\Postcode;
 use App\Models\User;
 use App\Notifications\WelcomeVolunteer;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class VolunteerRegistrationTest extends TestCase
 {
     /**
-     * @return array{name: string, email: string, password: string, password_confirmation: string, postcode: string, terms: string}
+     * @return array{name: string, email: string, postcode: string, terms: string}
      */
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
             'name' => 'Alex Fletcher',
             'email' => 'alex@example.com',
-            'password' => 'correct-horse-battery',
-            'password_confirmation' => 'correct-horse-battery',
             'postcode' => 'LS6 2AB',
             'terms' => '1',
         ], $overrides);
@@ -98,6 +97,71 @@ class VolunteerRegistrationTest extends TestCase
         Notification::assertSentTo($volunteer, WelcomeVolunteer::class);
     }
 
+    /**
+     * The form has no password field at all — a volunteer gives us three
+     * details and none of them is a credential.
+     */
+    public function test_the_join_form_does_not_ask_for_a_password(): void
+    {
+        $this->get('/join')
+            ->assertOk()
+            ->assertDontSee('name="password"', false)
+            ->assertDontSee('name="password_confirmation"', false);
+    }
+
+    /**
+     * The column is NOT NULL, so a new account holds a placeholder. It must be
+     * a real hash of something nobody knows — the failure to guard against is a
+     * fixed or empty string that would let anyone sign in as any volunteer who
+     * has not reached the password step yet.
+     */
+    public function test_a_new_account_cannot_be_signed_in_to(): void
+    {
+        Notification::fake();
+        Postcode::factory()->withPostcode('LS6 2AB')->create();
+
+        $this->post('/join', $this->validPayload());
+        $this->post('/join', $this->validPayload(['email' => 'sam@example.com']));
+
+        $volunteers = User::query()->get();
+
+        $this->assertCount(2, $volunteers);
+
+        foreach ($volunteers as $volunteer) {
+            $this->assertTrue(Hash::isHashed((string) $volunteer->password));
+            $this->assertFalse(Hash::check('', (string) $volunteer->password));
+            $this->assertFalse(Hash::check('password', (string) $volunteer->password));
+        }
+
+        // Two placeholders from the same run must not collide.
+        $this->assertNotSame($volunteers[0]->password, $volunteers[1]->password);
+    }
+
+    /**
+     * The whole point of moving the password to its own step: nothing that
+     * could sign in as this volunteer is ever put in an inbox.
+     */
+    public function test_the_welcome_email_carries_no_credentials(): void
+    {
+        Notification::fake();
+        Postcode::factory()->withPostcode('LS6 2AB')->create();
+
+        $this->post('/join', $this->validPayload());
+
+        $volunteer = User::query()->where('email', 'alex@example.com')->sole();
+
+        $body = (string) Notification::sent($volunteer, WelcomeVolunteer::class)
+            ->sole()
+            ->toMail($volunteer)
+            ->render();
+
+        // The structural marker, not the bare word "password" — the email talks
+        // about passwords on purpose, it just never carries one.
+        $this->assertStringNotContainsString('Your sign-in details', $body);
+        $this->assertStringContainsString('Confirm my email address', $body);
+        $this->assertStringContainsString('choose your password', $body);
+    }
+
     public function test_the_consent_box_starts_unticked(): void
     {
         $this->get('/join')
@@ -148,14 +212,6 @@ class VolunteerRegistrationTest extends TestCase
     {
         $this->post('/join', $this->validPayload(['postcode' => 'banana']))
             ->assertSessionHasErrors('postcode');
-    }
-
-    public function test_it_rejects_an_unconfirmed_password(): void
-    {
-        Postcode::factory()->withPostcode('LS6 2AB')->create();
-
-        $this->post('/join', $this->validPayload(['password_confirmation' => 'something-else']))
-            ->assertSessionHasErrors('password');
     }
 
     public function test_it_rejects_a_duplicate_email(): void

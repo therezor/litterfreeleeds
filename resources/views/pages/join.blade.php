@@ -12,7 +12,7 @@
 
                     <ol class="space-y-6">
                         @foreach ([
-        'Sign up' => 'Name, email and postcode. That is all we need.',
+        'Sign up' => 'Name, email and postcode. No password to think up — you choose one after confirming your email.',
         'Get matched' => 'We find the Purple Bag Holder closest to you and let them know you have joined.',
         'Start picking' => 'They get in touch, hand over purple bags, and you are away.',
     ] as $step => $detail)
@@ -54,12 +54,9 @@
                             autocomplete="postal-code" placeholder="LS1 1UR"
                             help="Used only to find the Purple Bag Holder nearest to you." />
 
-                        <div class="grid sm:grid-cols-2 gap-8">
-                            <x-form-field name="password" label="Choose a password" type="password" required
-                                autocomplete="new-password" />
-                            <x-form-field name="password_confirmation" label="Confirm password" type="password"
-                                required autocomplete="new-password" />
-                        </div>
+                        {{-- No password field, by design: choosing one is its own
+                             step, after the email address is confirmed. See
+                             App\Http\Controllers\SetPasswordController. --}}
 
                         <div class="border-t-2 border-ink-950/12 dark:border-white/12 pt-8">
                             <label for="terms" class="flex gap-4 cursor-pointer">

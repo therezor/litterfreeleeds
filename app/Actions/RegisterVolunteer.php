@@ -6,12 +6,19 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 /**
  * Everything that happens when someone signs up at /join: create the account,
  * make them a Picker, match them to their nearest Purple Bag Holder, and start
  * email verification.
+ *
+ * The form asks for three things and none of them is a password. Choosing one
+ * was the longest part of the form and the part people abandoned it on, so it
+ * has moved to its own step, after the volunteer clicks the link in the welcome
+ * email — see App\Http\Controllers\SetPasswordController. Until then the
+ * account exists but cannot be signed in to.
  *
  * The bag holder is deliberately NOT emailed here — that waits until the
  * address is verified, so holders are never sent chasing a typo. See
@@ -22,7 +29,7 @@ class RegisterVolunteer
     public function __construct(private readonly AssignNearestBagHolder $assign) {}
 
     /**
-     * @param  array{name: string, email: string, password: string, postcode: string}  $data
+     * @param  array{name: string, email: string, postcode: string}  $data
      */
     public function execute(array $data): User
     {
@@ -30,7 +37,13 @@ class RegisterVolunteer
             $picker = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => $data['password'],
+                // A placeholder, not a password: the column is NOT NULL and the
+                // volunteer has not chosen one yet. Random, never shown to
+                // anyone and never written down, so the account is unusable
+                // until they set their own — which is the intended state, not a
+                // gap. Anyone who abandons the flow can still get in through the
+                // panel's password reset.
+                'password' => Str::random(64),
                 // The observer resolves this to outward_code/latitude/longitude.
                 'postcode' => $data['postcode'],
             ]);

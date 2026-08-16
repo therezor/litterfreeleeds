@@ -9,7 +9,9 @@ Thank you for signing up. You have just joined thousands of volunteers across Le
 Confirm my email address
 @endcomponent
 
-This link expires in an hour. Nothing else happens until you use it.
+This link expires in an hour, and it is also where you choose your password — we didn't ask you for one when you signed up, and we'll never send you one by email.
+
+Nothing else happens until you use it. If the link expires or you'd rather do it later, "forgotten password" on the [sign-in page]({{ $loginUrl }}) gets you there just as well.
 
 ## What happens next
 

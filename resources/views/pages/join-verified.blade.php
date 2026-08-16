@@ -1,8 +1,10 @@
-<x-layouts.app title="Email confirmed" description="Your email address is confirmed and your Purple Bag Holder has been told you've joined.">
+<x-layouts.app title="You're all set" description="Your account is ready and your Purple Bag Holder has been told you've joined.">
 
-    <x-page-hero eyebrow="All set" heading="Email confirmed"
-        :subheading="session('alreadyVerified')
-            ? 'You had already confirmed this address — nothing more to do.'
+    {{-- Reachable on its own, so the copy has to make sense without the flash:
+         the password line is the extra, not the substance. --}}
+    <x-page-hero eyebrow="All set" heading="You're all set"
+        :subheading="session('passwordSet')
+            ? 'Email confirmed and password saved — you are signed in. Your local Purple Bag Holder has been told you have joined, and will be in touch soon.'
             : 'Your local Purple Bag Holder has been told you have joined. They will be in touch soon.'" />
 
     <section class="bg-white dark:bg-ink-900">

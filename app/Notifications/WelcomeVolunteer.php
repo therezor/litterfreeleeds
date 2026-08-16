@@ -17,6 +17,10 @@ use Illuminate\Support\Facades\URL;
  * It replaces Laravel's stock VerifyEmail for pickers (see
  * User::sendEmailVerificationNotification) so registration produces a single
  * email rather than a bare verification link followed by a welcome.
+ *
+ * It deliberately carries no password. The /join form does not ask for one and
+ * nothing generates one — the link below is where the volunteer chooses theirs,
+ * so no credential is ever put in an inbox.
  */
 class WelcomeVolunteer extends Notification implements ShouldQueue
 {
@@ -48,6 +52,10 @@ class WelcomeVolunteer extends Notification implements ShouldQueue
                 'name' => $notifiable->name,
                 'verificationUrl' => $this->verificationUrl($notifiable),
                 'hasBagHolder' => $holder instanceof User,
+                // The way back in if the verification link expires. A route name
+                // rather than Filament::getPanel()->getLoginUrl(): this renders
+                // on the queue, where no panel has been booted for the request.
+                'loginUrl' => route('filament.app.auth.login'),
                 'conditionsUrl' => route('purple-bag-conditions'),
                 'picksUrl' => route('upcoming-picks.index'),
             ]);

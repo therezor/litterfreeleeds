@@ -13,8 +13,9 @@
                         aria-hidden="true" />
                     <h2 class="display text-xl text-ink-950 dark:text-white mb-3">Check your inbox</h2>
                     <p class="text-sm text-ink-950/70 dark:text-brand-100/70 leading-relaxed">
-                        We've sent you an email with a link to confirm your address. Nothing else happens until you
-                        click it — including telling your Purple Bag Holder you've joined.
+                        We've sent you an email with a link to confirm your address. It's also where you'll choose
+                        your password. Nothing else happens until you click it — including telling your Purple Bag
+                        Holder you've joined.
                     </p>
                 </div>
 

@@ -32,7 +32,7 @@
                 <div class="lg:col-span-8 max-w-3xl divide-y divide-ink-950/12 dark:divide-white/12">
                     @foreach ([
         'What we collect' =>
-            'When you sign up as a volunteer we store your name, your email address, your postcode and a password. We also record the date you agreed to this policy. If you go on to organise or help run community picks, we store the details of those picks alongside your account.',
+            'When you sign up as a volunteer we store your name, your email address and your postcode. You choose a password once you have confirmed your email address, and we store only an encrypted version of it that nobody — including us — can read back. We also record the date you agreed to this policy. If you go on to organise or help run community picks, we store the details of those picks alongside your account.',
         'Why we collect your postcode' =>
             'Only to work out which Purple Bag Holder is closest to you. We convert your postcode to an approximate location using the Office for National Statistics Postcode Directory, which gives the centre point of a postcode rather than a specific address. We never ask for, and never store, your street address.',
         'Who we share it with' =>

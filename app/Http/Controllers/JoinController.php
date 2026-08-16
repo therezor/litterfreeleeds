@@ -19,8 +19,8 @@ class JoinController extends Controller
 
     public function store(JoinRequest $request): RedirectResponse
     {
-        /** @var array{name: string, email: string, password: string, postcode: string} $data */
-        $data = $request->safe()->only(['name', 'email', 'password', 'postcode']);
+        /** @var array{name: string, email: string, postcode: string} $data */
+        $data = $request->safe()->only(['name', 'email', 'postcode']);
 
         $volunteer = $this->register->execute($data);
 

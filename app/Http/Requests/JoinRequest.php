@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Rules\KnownUkPostcode;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 class JoinRequest extends FormRequest
 {
@@ -22,7 +21,9 @@ class JoinRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
-            'password' => ['required', 'string', 'confirmed', Password::defaults()],
+
+            // No password field. Choosing one is its own step, after the email
+            // address is confirmed — see App\Http\Controllers\SetPasswordController.
 
             // Reuses the rule the pick form uses, so an unknown postcode is a
             // validation message here rather than the UserObserver's exception.

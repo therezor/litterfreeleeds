@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CommunityPickController;
 use App\Http\Controllers\JoinController;
+use App\Http\Controllers\SetPasswordController;
 use App\Http\Controllers\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,14 @@ Route::get('/join', [JoinController::class, 'create'])->name('join.create');
 // Open public POST — rate limited per IP.
 Route::post('/join', [JoinController::class, 'store'])->middleware('throttle:10,1')->name('join.store');
 Route::get('/join/welcome', [JoinController::class, 'welcome'])->name('join.welcome');
+
+// The last step, reached from the verification link. Guarded by a session
+// capability rather than middleware — see SetPasswordController.
+Route::get('/join/password', [SetPasswordController::class, 'create'])->name('join.password');
+Route::post('/join/password', [SetPasswordController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('join.password.store');
+
 Route::view('/join/verified', 'pages.join-verified')->name('join.verified');
 
 // Signed, but deliberately not `auth` — see VerifyEmailController.

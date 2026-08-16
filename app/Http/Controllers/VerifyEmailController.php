@@ -22,6 +22,9 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * named `login` for the guest middleware to redirect to — it is Filament's
  * `filament.app.auth.login` — so requiring a session would throw rather than
  * prompt. The signature is the authentication.
+ *
+ * Verifying does not sign anyone in. It hands a volunteer one capability —
+ * choose a password — and SetPasswordController explains why that is the limit.
  */
 class VerifyEmailController extends Controller
 {
@@ -34,33 +37,41 @@ class VerifyEmailController extends Controller
             throw new AccessDeniedHttpException('Invalid verification link.');
         }
 
-        if ($user->hasVerifiedEmail()) {
-            return $this->destinationFor($user)->with('alreadyVerified', true);
+        // Only the verification itself is conditional. A volunteer who follows
+        // a second valid link still gets the password step below — the link is
+        // short-lived proof they can read the inbox, which is the same thing a
+        // password reset asks for.
+        if (! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+
+            // Fires NotifyBagHolderOfNewPicker — the bag holder hears about a
+            // volunteer only once the address is known to be real.
+            event(new Verified($user));
         }
 
-        $user->markEmailAsVerified();
-
-        // Fires NotifyBagHolderOfNewPicker — the bag holder hears about a
-        // volunteer only once the address is known to be real.
-        event(new Verified($user));
-
-        return $this->destinationFor($user);
+        return $this->destinationFor($request, $user);
     }
 
     /**
-     * Staff can reach this route too, because Laravel's stock VerifyEmail
+     * Volunteers go on to choose a password; staff already have one.
+     *
+     * Staff can reach this route because Laravel's stock VerifyEmail
      * notification resolves the `verification.verify` name we now own. Sending
-     * them to a volunteer confirmation page would be baffling, so they go to
+     * them through a volunteer signup step would be baffling, so they go to
      * the panel instead.
      *
      * Branching on the role rather than canAccessPanel(): volunteers can reach
-     * the panel now, but the confirmation page is the one that tells them their
-     * bag holder has been notified, which is the thing they are waiting on.
+     * the panel now, but they are the ones with a placeholder password and a
+     * bag holder to hear from.
      */
-    protected function destinationFor(User $user): RedirectResponse
+    protected function destinationFor(Request $request, User $user): RedirectResponse
     {
-        return $user->hasRole(User::ROLE_PICKER)
-            ? to_route('join.verified')
-            : redirect(Filament::getPanel('app')->getUrl());
+        if (! $user->hasRole(User::ROLE_PICKER)) {
+            return redirect(Filament::getPanel('app')->getUrl());
+        }
+
+        SetPasswordController::grantTo($request, $user);
+
+        return to_route('join.password');
     }
 }

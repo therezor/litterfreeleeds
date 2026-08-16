@@ -39,7 +39,7 @@ class EmailVerificationTest extends TestCase
 
         // No actingAs — volunteers open the email on a different device.
         $this->get($this->verificationUrl($picker))
-            ->assertRedirect(route('join.verified'));
+            ->assertRedirect(route('join.password'));
 
         $this->assertNotNull($picker->fresh()->email_verified_at);
     }
@@ -53,7 +53,8 @@ class EmailVerificationTest extends TestCase
 
         $this->get(route('join.verified'))
             ->assertOk()
-            ->assertSee('Email confirmed');
+            ->assertSee('All set')
+            ->assertSee('has been told you have joined');
     }
 
     public function test_it_rejects_a_tampered_hash(): void
@@ -121,8 +122,6 @@ class EmailVerificationTest extends TestCase
         $this->post('/join', [
             'name' => 'Alex Fletcher',
             'email' => 'alex@example.com',
-            'password' => 'correct-horse-battery',
-            'password_confirmation' => 'correct-horse-battery',
             'postcode' => 'LS6 2AB',
             'terms' => '1',
         ]);
@@ -130,14 +129,26 @@ class EmailVerificationTest extends TestCase
         Notification::assertNotSentTo($holder, NewPickerAssigned::class);
     }
 
+    /**
+     * A second click re-offers the password step rather than short-circuiting.
+     * The link is short-lived proof the volunteer can read the inbox — the same
+     * thing a password reset asks for — so honouring it twice is deliberate.
+     * What must not happen twice is the verification itself: the bag holder is
+     * told once, not once per click.
+     */
     public function test_verifying_twice_is_harmless(): void
     {
         Notification::fake();
         $picker = $this->picker();
+        $holder = User::factory()->bagHolder()->atPostcode('LS6 2AB')->create();
+        $picker->forceFill(['assigned_bag_holder_id' => $holder->getKey()])->save();
+
         $url = $this->verificationUrl($picker);
 
-        $this->get($url)->assertRedirect(route('join.verified'));
-        $this->get($url)->assertRedirect(route('join.verified'));
+        $this->get($url)->assertRedirect(route('join.password'));
+        $this->get($url)->assertRedirect(route('join.password'));
+
+        Notification::assertSentToTimes($holder, NewPickerAssigned::class, 1);
     }
 
     public function test_a_verified_staff_member_lands_in_the_panel(): void
